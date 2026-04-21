@@ -39,6 +39,16 @@ RouteFlow 是一个面向 macOS 的菜单栏应用，用来管理多网卡并存
 - 支持从当前系统路由表中识别可管理路由
 - 内置中英文界面文案
 
+### 界面预览
+
+主界面：网络接口、系统路由和导出能力
+
+![RouteFlow main interface](<screenshot/企业微信截图_876a869e-fdc6-41cb-8f6c-d32689fe5225.png>)
+
+规则列表：已保存规则与启动恢复开关
+
+![RouteFlow saved rules](<screenshot/企业微信截图_944b24d7-aa62-4c77-ac96-65ee1e658ddc.png>)
+
 ### 工作原理
 
 RouteFlow 当前的实现方式和代码保持一致，核心流程如下：
@@ -178,6 +188,16 @@ In that kind of setup, default routes and interface priorities often conflict wi
 - Imports and exports JSON configuration
 - Reads existing system routes and syncs managed state
 - Includes Chinese and English UI copy
+
+### Screenshots
+
+Main interface: network interfaces, live routes, and route export
+
+![RouteFlow main interface](<screenshot/企业微信截图_876a869e-fdc6-41cb-8f6c-d32689fe5225.png>)
+
+Saved rules view: persisted rules and restore-on-launch toggles
+
+![RouteFlow saved rules](<screenshot/企业微信截图_944b24d7-aa62-4c77-ac96-65ee1e658ddc.png>)
 
 ### How It Works
 
