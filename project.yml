@@ -1,0 +1,53 @@
+name: RouteFlow
+options:
+  bundleIdPrefix: com.routeflow
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "15.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+
+targets:
+  RouteFlow:
+    type: application
+    platform: macOS
+    sources:
+      - RouteFlow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.routeflow.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: true
+        INFOPLIST_KEY_CFBundleDisplayName: RouteFlow
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_APP_SANDBOX: NO
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        debug:
+          CODE_SIGN_IDENTITY: "-"
+        release:
+          CODE_SIGN_IDENTITY: "-"
+    entitlements:
+      path: RouteFlow/RouteFlow.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+
+  RouteFlowTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - RouteFlowTests
+    dependencies:
+      - target: RouteFlow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.routeflow.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_APP_SANDBOX: NO

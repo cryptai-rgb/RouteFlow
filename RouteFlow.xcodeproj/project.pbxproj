@@ -1,0 +1,527 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		05FA17C0B26D680C81BA79D0 /* MenuBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6E55680EAB65B986376E3D /* MenuBarViewModel.swift */; };
+		0BA9C4305535A6C3F8958ED5 /* RouteCommandBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688002C7A1D3A194588D4661 /* RouteCommandBuilderTests.swift */; };
+		0D46DCD2F91696A967AC3943 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD45A8A1DD5CDCFDD9A460CE /* SettingsView.swift */; };
+		11E7632B649AA8F57D5F1ADF /* InterfaceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE124C8541962AB3D2B00E94 /* InterfaceRow.swift */; };
+		17FC3B7A8FE500CB985A158C /* NetworkInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8EB44DE06ECDCEDD7DB1580 /* NetworkInterface.swift */; };
+		4917A13946F9B514F3E383B8 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = B169F920FDF33FC8B798B6B0 /* AppConfig.swift */; };
+		57CDC896532F0752B62165E9 /* RouteRuleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E4A32821D2BF9ED35CD6F9B /* RouteRuleListView.swift */; };
+		60D14203916146F5C78E3922 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923EC5FA28178DEDB12B3CCA /* SettingsViewModel.swift */; };
+		6A01284602C4BB01EF1E3856 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E165E091DFD492E3D189352B /* Assets.xcassets */; };
+		7A226269FB182C65AB3D385E /* RouteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433E82A007C841D0DD3CE4AB /* RouteManager.swift */; };
+		8D3C20E12A8F4B4A9D9B1171 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3C20E02A8F4B4A9D9B1171 /* Localization.swift */; };
+		A7A4A946A3A61A8442693772 /* AddRouteRuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F7BB5F2E343A0B58AB94C3 /* AddRouteRuleView.swift */; };
+		AE817AD69E3AE873FCB7B466 /* RouteCommandBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E574C95CDB8BE6E2C72888A5 /* RouteCommandBuilder.swift */; };
+		B0E04E4E9F1AA209F3548F45 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC0F024617EE5DFB459F786 /* MenuBarView.swift */; };
+		B0F6D04746564DDE7552CC2C /* RouteRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA4CE713840D6CE3C478741 /* RouteRule.swift */; };
+		CEE09C3645EC4ECCBFCFD9F8 /* PrivilegedExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A65819ADE631BC41B351E08 /* PrivilegedExecutor.swift */; };
+		ED07B4BE6162B0DD6CFECAE2 /* NetworkDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C9E3C21D148DAE17C5AA32 /* NetworkDetector.swift */; };
+		F4AA88EF11C96582352E606F /* RouteFlowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFAC2FCC9D97008100AC95B1 /* RouteFlowApp.swift */; };
+		FFD2034A139C46A340C73EA6 /* ConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7960DDB9BC61C3E0F4CDECE8 /* ConfigManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6415219F86ABBDA6F4C84D8B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 071A23027F10D2FB04161372 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 794FBB7A9578C93A5503B36A;
+			remoteInfo = RouteFlow;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0E4A32821D2BF9ED35CD6F9B /* RouteRuleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteRuleListView.swift; sourceTree = "<group>"; };
+		30143A978305B4A00D478CC6 /* RouteFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RouteFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A65819ADE631BC41B351E08 /* PrivilegedExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedExecutor.swift; sourceTree = "<group>"; };
+		3AC0F024617EE5DFB459F786 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		433E82A007C841D0DD3CE4AB /* RouteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteManager.swift; sourceTree = "<group>"; };
+		688002C7A1D3A194588D4661 /* RouteCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteCommandBuilderTests.swift; sourceTree = "<group>"; };
+		73382B988B5BC4C573D65D41 /* RouteFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RouteFlow.entitlements; sourceTree = "<group>"; };
+		7960DDB9BC61C3E0F4CDECE8 /* ConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigManager.swift; sourceTree = "<group>"; };
+		8D3C20E02A8F4B4A9D9B1171 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		923EC5FA28178DEDB12B3CCA /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		96F7BB5F2E343A0B58AB94C3 /* AddRouteRuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRouteRuleView.swift; sourceTree = "<group>"; };
+		9F6E55680EAB65B986376E3D /* MenuBarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarViewModel.swift; sourceTree = "<group>"; };
+		ACD3140C9E0D6A2A6B251A42 /* RouteFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RouteFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE124C8541962AB3D2B00E94 /* InterfaceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceRow.swift; sourceTree = "<group>"; };
+		B169F920FDF33FC8B798B6B0 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		CBA4CE713840D6CE3C478741 /* RouteRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteRule.swift; sourceTree = "<group>"; };
+		E165E091DFD492E3D189352B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E574C95CDB8BE6E2C72888A5 /* RouteCommandBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteCommandBuilder.swift; sourceTree = "<group>"; };
+		F2C9E3C21D148DAE17C5AA32 /* NetworkDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkDetector.swift; sourceTree = "<group>"; };
+		F8EB44DE06ECDCEDD7DB1580 /* NetworkInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInterface.swift; sourceTree = "<group>"; };
+		FD45A8A1DD5CDCFDD9A460CE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FFAC2FCC9D97008100AC95B1 /* RouteFlowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteFlowApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		017720B07443F96EDD52A8AE /* RouteFlow */ = {
+			isa = PBXGroup;
+			children = (
+				E165E091DFD492E3D189352B /* Assets.xcassets */,
+				73382B988B5BC4C573D65D41 /* RouteFlow.entitlements */,
+				4F006AA15615024DF6D50B97 /* App */,
+				2AA9EAC48C1F3DAF5A3DE9E8 /* Helpers */,
+				F98898A4B068A15A529FBAB0 /* Models */,
+				7CC54F180B3A2339D378E645 /* Services */,
+				5082151BA8C39E94BA8455EA /* ViewModels */,
+				57DE42C3C5EF2A3441A90EA3 /* Views */,
+			);
+			path = RouteFlow;
+			sourceTree = "<group>";
+		};
+		0F1EBFF971EE61EF32F238F8 = {
+			isa = PBXGroup;
+			children = (
+				017720B07443F96EDD52A8AE /* RouteFlow */,
+				C7DBE7FDA3E86ADF2F7D8541 /* RouteFlowTests */,
+				3B243697480E01C0527C7BE9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2AA9EAC48C1F3DAF5A3DE9E8 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				8D3C20E02A8F4B4A9D9B1171 /* Localization.swift */,
+				E574C95CDB8BE6E2C72888A5 /* RouteCommandBuilder.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		3B243697480E01C0527C7BE9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ACD3140C9E0D6A2A6B251A42 /* RouteFlow.app */,
+				30143A978305B4A00D478CC6 /* RouteFlowTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4F006AA15615024DF6D50B97 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				FFAC2FCC9D97008100AC95B1 /* RouteFlowApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		5082151BA8C39E94BA8455EA /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				9F6E55680EAB65B986376E3D /* MenuBarViewModel.swift */,
+				923EC5FA28178DEDB12B3CCA /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		57DE42C3C5EF2A3441A90EA3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				96F7BB5F2E343A0B58AB94C3 /* AddRouteRuleView.swift */,
+				AE124C8541962AB3D2B00E94 /* InterfaceRow.swift */,
+				3AC0F024617EE5DFB459F786 /* MenuBarView.swift */,
+				0E4A32821D2BF9ED35CD6F9B /* RouteRuleListView.swift */,
+				FD45A8A1DD5CDCFDD9A460CE /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		7CC54F180B3A2339D378E645 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				7960DDB9BC61C3E0F4CDECE8 /* ConfigManager.swift */,
+				F2C9E3C21D148DAE17C5AA32 /* NetworkDetector.swift */,
+				3A65819ADE631BC41B351E08 /* PrivilegedExecutor.swift */,
+				433E82A007C841D0DD3CE4AB /* RouteManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C7DBE7FDA3E86ADF2F7D8541 /* RouteFlowTests */ = {
+			isa = PBXGroup;
+			children = (
+				688002C7A1D3A194588D4661 /* RouteCommandBuilderTests.swift */,
+			);
+			path = RouteFlowTests;
+			sourceTree = "<group>";
+		};
+		F98898A4B068A15A529FBAB0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B169F920FDF33FC8B798B6B0 /* AppConfig.swift */,
+				F8EB44DE06ECDCEDD7DB1580 /* NetworkInterface.swift */,
+				CBA4CE713840D6CE3C478741 /* RouteRule.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		794FBB7A9578C93A5503B36A /* RouteFlow */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3727AEB6E0C5ABCCA00326A3 /* Build configuration list for PBXNativeTarget "RouteFlow" */;
+			buildPhases = (
+				299FD89EB4AC21D2B18379A3 /* Sources */,
+				79A1165B500D35A6D6E7D1E8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RouteFlow;
+			packageProductDependencies = (
+			);
+			productName = RouteFlow;
+			productReference = ACD3140C9E0D6A2A6B251A42 /* RouteFlow.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C23BD03785414585AF1C0486 /* RouteFlowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DE174839F436F6313185998 /* Build configuration list for PBXNativeTarget "RouteFlowTests" */;
+			buildPhases = (
+				5838622A1C6315B67352FFAC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2BC52CF468B00A8F13BBAD56 /* PBXTargetDependency */,
+			);
+			name = RouteFlowTests;
+			packageProductDependencies = (
+			);
+			productName = RouteFlowTests;
+			productReference = 30143A978305B4A00D478CC6 /* RouteFlowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		071A23027F10D2FB04161372 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					794FBB7A9578C93A5503B36A = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 729BC4E6B88DEDBDB3992F52 /* Build configuration list for PBXProject "RouteFlow" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0F1EBFF971EE61EF32F238F8;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3B243697480E01C0527C7BE9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				794FBB7A9578C93A5503B36A /* RouteFlow */,
+				C23BD03785414585AF1C0486 /* RouteFlowTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		79A1165B500D35A6D6E7D1E8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A01284602C4BB01EF1E3856 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		299FD89EB4AC21D2B18379A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7A4A946A3A61A8442693772 /* AddRouteRuleView.swift in Sources */,
+				4917A13946F9B514F3E383B8 /* AppConfig.swift in Sources */,
+				FFD2034A139C46A340C73EA6 /* ConfigManager.swift in Sources */,
+				11E7632B649AA8F57D5F1ADF /* InterfaceRow.swift in Sources */,
+				F4AA88EF11C96582352E606F /* RouteFlowApp.swift in Sources */,
+				8D3C20E12A8F4B4A9D9B1171 /* Localization.swift in Sources */,
+				B0E04E4E9F1AA209F3548F45 /* MenuBarView.swift in Sources */,
+				05FA17C0B26D680C81BA79D0 /* MenuBarViewModel.swift in Sources */,
+				ED07B4BE6162B0DD6CFECAE2 /* NetworkDetector.swift in Sources */,
+				17FC3B7A8FE500CB985A158C /* NetworkInterface.swift in Sources */,
+				CEE09C3645EC4ECCBFCFD9F8 /* PrivilegedExecutor.swift in Sources */,
+				AE817AD69E3AE873FCB7B466 /* RouteCommandBuilder.swift in Sources */,
+				7A226269FB182C65AB3D385E /* RouteManager.swift in Sources */,
+				B0F6D04746564DDE7552CC2C /* RouteRule.swift in Sources */,
+				57CDC896532F0752B62165E9 /* RouteRuleListView.swift in Sources */,
+				0D46DCD2F91696A967AC3943 /* SettingsView.swift in Sources */,
+				60D14203916146F5C78E3922 /* SettingsViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5838622A1C6315B67352FFAC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0BA9C4305535A6C3F8958ED5 /* RouteCommandBuilderTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2BC52CF468B00A8F13BBAD56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 794FBB7A9578C93A5503B36A /* RouteFlow */;
+			targetProxy = 6415219F86ABBDA6F4C84D8B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		100BA716EA3C8771DEB0963D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		1292ABB9FA8C0EF625094CD3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		6DA1C12EA0494D908583330B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.routeflow.app.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RouteFlow.app/Contents/MacOS/RouteFlow";
+			};
+			name = Release;
+		};
+		90C8561C1D129150C16D8F17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RouteFlow/RouteFlow.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RouteFlow;
+				INFOPLIST_KEY_LSUIElement = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.routeflow.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B99BEA654E367FD42DC9D668 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = RouteFlow/RouteFlow.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = RouteFlow;
+				INFOPLIST_KEY_LSUIElement = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.routeflow.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F8979FC5AB3D8FEEE680751B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.routeflow.app.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RouteFlow.app/Contents/MacOS/RouteFlow";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3727AEB6E0C5ABCCA00326A3 /* Build configuration list for PBXNativeTarget "RouteFlow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B99BEA654E367FD42DC9D668 /* Debug */,
+				90C8561C1D129150C16D8F17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6DE174839F436F6313185998 /* Build configuration list for PBXNativeTarget "RouteFlowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8979FC5AB3D8FEEE680751B /* Debug */,
+				6DA1C12EA0494D908583330B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		729BC4E6B88DEDBDB3992F52 /* Build configuration list for PBXProject "RouteFlow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1292ABB9FA8C0EF625094CD3 /* Debug */,
+				100BA716EA3C8771DEB0963D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 071A23027F10D2FB04161372 /* Project object */;
+}
