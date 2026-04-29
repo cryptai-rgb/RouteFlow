@@ -20,16 +20,17 @@ struct RouteCommandBuilder {
             args += ["-host", normalizedDestination]
         }
 
-        args += ["-ifscope", interfaceName, gateway]
+        _ = interfaceName
+        args.append(gateway)
         return args
     }
 
     /// Build a route delete command arguments
     /// - Parameters:
     ///   - destination: IP address or CIDR
-    ///   - interfaceName: Device name (e.g. "en1")
+    ///   - gateway: Gateway IP used when the route was created
     /// - Returns: Array of arguments for `/sbin/route delete`
-    static func buildDeleteCommand(destination: String, interfaceName: String) -> [String] {
+    static func buildDeleteCommand(destination: String, gateway: String? = nil) -> [String] {
         var args = ["delete"]
         let normalizedDestination = canonicalDestination(destination)
 
@@ -39,7 +40,19 @@ struct RouteCommandBuilder {
             args += ["-host", normalizedDestination]
         }
 
+        if let gateway, !gateway.isEmpty {
+            args.append(gateway)
+        }
+        return args
+    }
+
+    /// Build a legacy scoped route delete command for migrating old `-ifscope` routes.
+    static func buildScopedDeleteCommand(destination: String, interfaceName: String, gateway: String? = nil) -> [String] {
+        var args = buildDeleteCommand(destination: destination)
         args += ["-ifscope", interfaceName]
+        if let gateway, !gateway.isEmpty {
+            args.append(gateway)
+        }
         return args
     }
 
@@ -89,6 +102,10 @@ struct RouteCommandBuilder {
     }
 
     static func routeMatches(rule: RouteRule, entry: SystemRouteEntry) -> Bool {
+        routeIdentityMatches(rule: rule, entry: entry) && !entry.isInterfaceScoped
+    }
+
+    static func routeIdentityMatches(rule: RouteRule, entry: SystemRouteEntry) -> Bool {
         destinationsEquivalent(rule.destination, entry.destination) &&
         rule.interfaceName == entry.interfaceName &&
         rule.gateway == entry.gateway
@@ -192,6 +209,10 @@ struct SystemRouteEntry: Identifiable, Equatable {
 
     var isNetworkRoute: Bool {
         destination.contains("/") && !isDefaultRoute
+    }
+
+    var isInterfaceScoped: Bool {
+        flags.contains("I")
     }
 
     var routeKindTitle: String {

@@ -12,7 +12,7 @@ final class RouteCommandBuilderTests: XCTestCase {
             gateway: "10.65.72.1"
         )
 
-        XCTAssertEqual(args, ["add", "-host", "10.0.0.5", "-ifscope", "en1", "10.65.72.1"])
+        XCTAssertEqual(args, ["add", "-host", "10.0.0.5", "10.65.72.1"])
     }
 
     func testBuildAddNetworkCommand() {
@@ -22,24 +22,34 @@ final class RouteCommandBuilderTests: XCTestCase {
             gateway: "192.168.1.1"
         )
 
-        XCTAssertEqual(args, ["add", "-net", "192.168.1.0/24", "-ifscope", "en0", "192.168.1.1"])
+        XCTAssertEqual(args, ["add", "-net", "192.168.1.0/24", "192.168.1.1"])
     }
 
     // MARK: - Delete Commands
 
     func testBuildDeleteHostCommand() {
-        let args = RouteCommandBuilder.buildDeleteCommand(destination: "10.0.0.5", interfaceName: "en1")
-        XCTAssertEqual(args, ["delete", "-host", "10.0.0.5", "-ifscope", "en1"])
+        let args = RouteCommandBuilder.buildDeleteCommand(destination: "10.0.0.5", gateway: "10.65.72.1")
+        XCTAssertEqual(args, ["delete", "-host", "10.0.0.5", "10.65.72.1"])
     }
 
     func testBuildDeleteNetworkCommand() {
-        let args = RouteCommandBuilder.buildDeleteCommand(destination: "192.168.1.0/24", interfaceName: "en0")
-        XCTAssertEqual(args, ["delete", "-net", "192.168.1.0/24", "-ifscope", "en0"])
+        let args = RouteCommandBuilder.buildDeleteCommand(destination: "192.168.1.0/24", gateway: "192.168.1.1")
+        XCTAssertEqual(args, ["delete", "-net", "192.168.1.0/24", "192.168.1.1"])
     }
 
     func testBuildDeleteNetworkCommandCanonicalizesHostBits() {
-        let args = RouteCommandBuilder.buildDeleteCommand(destination: "172.21.11.82/24", interfaceName: "en0")
-        XCTAssertEqual(args, ["delete", "-net", "172.21.11.0/24", "-ifscope", "en0"])
+        let args = RouteCommandBuilder.buildDeleteCommand(destination: "172.21.11.82/24", gateway: "10.65.196.1")
+        XCTAssertEqual(args, ["delete", "-net", "172.21.11.0/24", "10.65.196.1"])
+    }
+
+    func testBuildScopedDeleteCommandRetainsIfscopeForLegacyCleanup() {
+        let args = RouteCommandBuilder.buildScopedDeleteCommand(
+            destination: "172.21.11.82/24",
+            interfaceName: "en0",
+            gateway: "10.65.196.1"
+        )
+
+        XCTAssertEqual(args, ["delete", "-net", "172.21.11.0/24", "-ifscope", "en0", "10.65.196.1"])
     }
 
     // MARK: - Get Commands
@@ -139,6 +149,25 @@ final class RouteCommandBuilderTests: XCTestCase {
         XCTAssertTrue(RouteCommandBuilder.routeMatches(rule: rule, entry: entry))
     }
 
+    func testRouteMatchesRejectsLegacyInterfaceScopedRoute() {
+        let rule = RouteRule(
+            destination: "172.21.11.82/24",
+            interfaceName: "en0",
+            gateway: "10.65.196.1",
+            hardwarePort: "Ethernet"
+        )
+        let entry = SystemRouteEntry(
+            destination: "172.21.11/24",
+            gateway: "10.65.196.1",
+            flags: "UGSI",
+            interfaceName: "en0",
+            expire: nil
+        )
+
+        XCTAssertFalse(RouteCommandBuilder.routeMatches(rule: rule, entry: entry))
+        XCTAssertTrue(RouteCommandBuilder.routeIdentityMatches(rule: rule, entry: entry))
+    }
+
     func testRouteMatchesRequiresSameInterfaceAndGateway() {
         let rule = RouteRule(
             destination: "8.8.8.8",
@@ -196,6 +225,121 @@ final class RouteCommandBuilderTests: XCTestCase {
         XCTAssertTrue(networkRoute.isNetworkRoute)
         XCTAssertFalse(defaultRoute.isNetworkRoute)
         XCTAssertFalse(hostRoute.isNetworkRoute)
+    }
+}
+
+final class RouteDestinationParserTests: XCTestCase {
+
+    func testParseAcceptsCompressedCIDRFormatFromExportFile() {
+        let parsed = RouteDestinationParser.parse("""
+        10.36.3/24
+        172.22.7/24
+        172.22.16/24
+        """)
+
+        XCTAssertEqual(parsed.valid, ["10.36.3/24", "172.22.7/24", "172.22.16/24"])
+        XCTAssertTrue(parsed.invalid.isEmpty)
+    }
+
+    func testParseRejectsCompressedHostIPv4() {
+        let parsed = RouteDestinationParser.parse("10.36.3")
+
+        XCTAssertTrue(parsed.valid.isEmpty)
+        XCTAssertEqual(parsed.invalid, ["10.36.3"])
+    }
+
+    func testParseDeduplicatesMixedSeparators() {
+        let parsed = RouteDestinationParser.parse("172.22.7/24, 172.22.7/24\n172.22.16/24")
+
+        XCTAssertEqual(parsed.valid, ["172.22.7/24", "172.22.16/24"])
+    }
+}
+
+final class AddRouteInterfaceSelectionTests: XCTestCase {
+
+    func testPreferredInterfaceIDResolvesToMatchingInterface() {
+        let interfaces = [
+            makeInterface(id: "en1", port: "Wi-Fi"),
+            makeInterface(id: "en0", port: "Ethernet")
+        ]
+
+        let selectedID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: interfaces,
+            preferredInterfaceID: "en0",
+            currentSelectionID: nil
+        )
+
+        XCTAssertEqual(selectedID, "en0")
+        XCTAssertEqual(
+            AddRouteInterfaceSelection.selectedInterface(from: interfaces, selectedInterfaceID: selectedID)?.hardwarePort,
+            "Ethernet"
+        )
+    }
+
+    func testCurrentSelectionSurvivesArrayRebuildAndReorder() {
+        let original = [
+            makeInterface(id: "en1", port: "Wi-Fi"),
+            makeInterface(id: "en0", port: "Ethernet")
+        ]
+        let rebuilt = [
+            makeInterface(id: "en0", port: "Ethernet"),
+            makeInterface(id: "en1", port: "Wi-Fi")
+        ]
+
+        let selectedID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: original,
+            preferredInterfaceID: "en1",
+            currentSelectionID: "en0"
+        )
+        let reconciledID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: rebuilt,
+            preferredInterfaceID: "en1",
+            currentSelectionID: selectedID
+        )
+
+        XCTAssertEqual(reconciledID, "en0")
+        XCTAssertEqual(
+            AddRouteInterfaceSelection.selectedInterface(from: rebuilt, selectedInterfaceID: reconciledID)?.hardwarePort,
+            "Ethernet"
+        )
+    }
+
+    func testMissingSelectionFallsBackToFirstValidInterface() {
+        let interfaces = [
+            makeInterface(id: "en2", port: "USB Ethernet"),
+            makeInterface(id: "en1", port: "Wi-Fi")
+        ]
+
+        let selectedID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: interfaces,
+            preferredInterfaceID: "en9",
+            currentSelectionID: "en8"
+        )
+
+        XCTAssertEqual(selectedID, "en2")
+    }
+
+    func testEmptyInterfaceListClearsSelection() {
+        let selectedID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: [],
+            preferredInterfaceID: "en0",
+            currentSelectionID: "en1"
+        )
+
+        XCTAssertNil(selectedID)
+        XCTAssertNil(AddRouteInterfaceSelection.selectedInterface(from: [], selectedInterfaceID: selectedID))
+    }
+
+    private func makeInterface(id: String, port: String) -> NetworkInterface {
+        NetworkInterface(
+            id: id,
+            deviceName: id,
+            hardwarePort: port,
+            macAddress: "aa:bb:cc:dd:ee:ff",
+            isActive: true,
+            ipAddress: "10.0.0.1",
+            gateway: "10.0.0.254"
+        )
     }
 }
 
@@ -403,5 +547,17 @@ final class RouteManagerTests: XCTestCase {
 
     func testDeleteErrorDoesNotIgnoreRealFailures() {
         XCTAssertFalse(RouteManager.isIgnorableDeleteError("route: permission denied"))
+    }
+}
+
+@MainActor
+final class MenuBarViewModelLogicTests: XCTestCase {
+
+    func testDeletingSavedRuleSkipsSystemRemovalWhenGloballyInactive() {
+        XCTAssertFalse(MenuBarViewModel.shouldRemoveSystemRouteWhenDeletingSavedRule(isGloballyActive: false))
+    }
+
+    func testDeletingSavedRuleRemovesSystemRouteWhenGloballyActive() {
+        XCTAssertTrue(MenuBarViewModel.shouldRemoveSystemRouteWhenDeletingSavedRule(isGloballyActive: true))
     }
 }

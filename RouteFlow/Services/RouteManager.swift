@@ -38,11 +38,15 @@ class RouteManager: ObservableObject {
     }
 
     /// Remove a route by destination (requires admin privileges)
-    func removeRoute(destination: String, interfaceName: String) async throws {
-        let args = RouteCommandBuilder.buildDeleteCommand(destination: destination, interfaceName: interfaceName)
+    func removeRoute(destination: String, interfaceName: String, gateway: String) async throws {
+        let script = buildSingleDeleteScript(
+            destination: destination,
+            interfaceName: interfaceName,
+            gateway: gateway
+        )
 
         do {
-            _ = try await executor.executePrivilegedCommand("/sbin/route", arguments: args)
+            _ = try await executor.executePrivilegedScript(script)
             lastError = nil
         } catch let error as PrivilegedExecutor.PrivilegedError {
             if case .userCancelled = error {
@@ -161,42 +165,28 @@ class RouteManager: ObservableObject {
     }
 
     private func buildBatchScript(for rules: [RouteRule], operation: BatchRouteOperation) -> String {
+        let helpers = batchShellHelpers()
         let successLiteral = PrivilegedExecutor.shellEscape(batchSuccessMarker)
         let failureLiteral = PrivilegedExecutor.shellEscape(batchFailureMarker)
 
         let snippets = rules.map { rule -> String in
-            let args: [String]
             switch operation {
             case .add:
-                args = RouteCommandBuilder.buildAddCommand(
-                    destination: rule.destination,
-                    interfaceName: rule.interfaceName,
-                    gateway: rule.gateway
+                return buildAddSnippet(
+                    for: rule,
+                    successLiteral: successLiteral,
+                    failureLiteral: failureLiteral
                 )
             case .delete:
-                args = RouteCommandBuilder.buildDeleteCommand(
-                    destination: rule.destination,
-                    interfaceName: rule.interfaceName
+                return buildDeleteSnippet(
+                    for: rule,
+                    successLiteral: successLiteral,
+                    failureLiteral: failureLiteral
                 )
             }
-
-            let command = PrivilegedExecutor.buildShellCommand("/sbin/route", arguments: args)
-            let ruleID = PrivilegedExecutor.shellEscape(rule.id.uuidString)
-            let destination = PrivilegedExecutor.shellEscape(rule.destination)
-
-            return """
-            command_output=$({ \(command); } 2>&1)
-            status=$?
-            command_output=$(printf '%s' "$command_output" | tr '\\n' ' ' | tr '\\t' ' ')
-            if [ "$status" -eq 0 ]; then
-              printf '%s\\t%s\\t%s\\n' \(successLiteral) \(ruleID) \(destination)
-            else
-              printf '%s\\t%s\\t%s\\t%s\\n' \(failureLiteral) \(ruleID) \(destination) "$command_output"
-            fi
-            """
         }
 
-        return snippets.joined(separator: "\n") + "\nexit 0"
+        return ([helpers] + snippets + ["exit 0"]).joined(separator: "\n")
     }
 
     private func parseBatchResult(
@@ -256,5 +246,151 @@ class RouteManager: ObservableObject {
         }
 
         lastError = result.failures.values.first
+    }
+
+    private func buildAddSnippet(
+        for rule: RouteRule,
+        successLiteral: String,
+        failureLiteral: String
+    ) -> String {
+        let addCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildAddCommand(
+                destination: rule.destination,
+                interfaceName: rule.interfaceName,
+                gateway: rule.gateway
+            )
+        )
+        let legacyDeleteCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildScopedDeleteCommand(
+                destination: rule.destination,
+                interfaceName: rule.interfaceName,
+                gateway: rule.gateway
+            )
+        )
+        let ruleID = PrivilegedExecutor.shellEscape(rule.id.uuidString)
+        let destination = PrivilegedExecutor.shellEscape(rule.destination)
+
+        return """
+        legacy_output=$({ \(legacyDeleteCommand); } 2>&1)
+        legacy_status=$?
+        legacy_output=$(normalize_routeflow_output "$legacy_output")
+        if [ "$legacy_status" -ne 0 ] && ! is_routeflow_ignorable_delete_error "$legacy_output"; then
+          printf '%s\\t%s\\t%s\\t%s\\n' \(failureLiteral) \(ruleID) \(destination) "$legacy_output"
+        else
+          command_output=$({ \(addCommand); } 2>&1)
+          status=$?
+          command_output=$(normalize_routeflow_output "$command_output")
+          if [ "$status" -eq 0 ]; then
+            printf '%s\\t%s\\t%s\\n' \(successLiteral) \(ruleID) \(destination)
+          else
+            printf '%s\\t%s\\t%s\\t%s\\n' \(failureLiteral) \(ruleID) \(destination) "$command_output"
+          fi
+        fi
+        """
+    }
+
+    private func buildDeleteSnippet(
+        for rule: RouteRule,
+        successLiteral: String,
+        failureLiteral: String
+    ) -> String {
+        let deleteCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildDeleteCommand(
+                destination: rule.destination,
+                gateway: rule.gateway
+            )
+        )
+        let legacyDeleteCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildScopedDeleteCommand(
+                destination: rule.destination,
+                interfaceName: rule.interfaceName,
+                gateway: rule.gateway
+            )
+        )
+        let ruleID = PrivilegedExecutor.shellEscape(rule.id.uuidString)
+        let destination = PrivilegedExecutor.shellEscape(rule.destination)
+
+        return """
+        primary_output=$({ \(deleteCommand); } 2>&1)
+        primary_status=$?
+        primary_output=$(normalize_routeflow_output "$primary_output")
+        legacy_output=$({ \(legacyDeleteCommand); } 2>&1)
+        legacy_status=$?
+        legacy_output=$(normalize_routeflow_output "$legacy_output")
+        if [ "$primary_status" -eq 0 ] || [ "$legacy_status" -eq 0 ]; then
+          printf '%s\\t%s\\t%s\\n' \(successLiteral) \(ruleID) \(destination)
+        elif is_routeflow_ignorable_delete_error "$primary_output" && is_routeflow_ignorable_delete_error "$legacy_output"; then
+          printf '%s\\t%s\\t%s\\n' \(successLiteral) \(ruleID) \(destination)
+        else
+          failure_message="$primary_output"
+          if is_routeflow_ignorable_delete_error "$failure_message"; then
+            failure_message="$legacy_output"
+          fi
+          printf '%s\\t%s\\t%s\\t%s\\n' \(failureLiteral) \(ruleID) \(destination) "$failure_message"
+        fi
+        """
+    }
+
+    private func buildSingleDeleteScript(destination: String, interfaceName: String, gateway: String) -> String {
+        let deleteCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildDeleteCommand(
+                destination: destination,
+                gateway: gateway
+            )
+        )
+        let legacyDeleteCommand = PrivilegedExecutor.buildShellCommand(
+            "/sbin/route",
+            arguments: RouteCommandBuilder.buildScopedDeleteCommand(
+                destination: destination,
+                interfaceName: interfaceName,
+                gateway: gateway
+            )
+        )
+
+        return """
+        \(batchShellHelpers())
+        primary_output=$({ \(deleteCommand); } 2>&1)
+        primary_status=$?
+        primary_output=$(normalize_routeflow_output "$primary_output")
+        legacy_output=$({ \(legacyDeleteCommand); } 2>&1)
+        legacy_status=$?
+        legacy_output=$(normalize_routeflow_output "$legacy_output")
+        if [ "$primary_status" -eq 0 ] || [ "$legacy_status" -eq 0 ]; then
+          exit 0
+        fi
+        if is_routeflow_ignorable_delete_error "$primary_output" && is_routeflow_ignorable_delete_error "$legacy_output"; then
+          exit 0
+        fi
+        if is_routeflow_ignorable_delete_error "$primary_output"; then
+          printf '%s\\n' "$legacy_output"
+        else
+          printf '%s\\n' "$primary_output"
+        fi
+        exit 1
+        """
+    }
+
+    private func batchShellHelpers() -> String {
+        """
+        normalize_routeflow_output() {
+          printf '%s' "$1" | tr '\\n' ' ' | tr '\\t' ' '
+        }
+
+        is_routeflow_ignorable_delete_error() {
+          case "$1" in
+            *"not in table"*|*"No such process"*)
+              return 0
+              ;;
+            *)
+              return 1
+              ;;
+          esac
+        }
+        """
     }
 }
