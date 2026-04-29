@@ -113,6 +113,7 @@ struct GeneralSettingsView: View {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "RouteFlow-config.json"
+        NSApplication.shared.activate(ignoringOtherApps: true)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             try ConfigManager.shared.exportConfig(to: url)
@@ -124,6 +125,7 @@ struct GeneralSettingsView: View {
     private func importConfig() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.json]
+        NSApplication.shared.activate(ignoringOtherApps: true)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             let config = try ConfigManager.shared.importConfig(from: url)

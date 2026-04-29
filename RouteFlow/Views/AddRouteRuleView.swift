@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AddRouteRuleView: View {
     @EnvironmentObject var viewModel: MenuBarViewModel
@@ -9,22 +10,25 @@ struct AddRouteRuleView: View {
     let onClose: (() -> Void)?
 
     @State private var destinationsText: String = ""
-    @State private var selectedInterfaceIndex: Int = 0
+    @State private var selectedInterfaceID: String?
     @State private var errorMessage: String?
     @State private var resultMessage: String?
     @State private var isSubmitting = false
+    @State private var importedFileURL: URL?
 
     private var validInterfaces: [NetworkInterface] {
         viewModel.validTargetInterfaces
     }
 
     private var selectedInterface: NetworkInterface? {
-        guard !validInterfaces.isEmpty, selectedInterfaceIndex < validInterfaces.count else { return nil }
-        return validInterfaces[selectedInterfaceIndex]
+        AddRouteInterfaceSelection.selectedInterface(
+            from: validInterfaces,
+            selectedInterfaceID: selectedInterfaceID
+        )
     }
 
     private var parsedDestinations: ParsedDestinations {
-        Self.parseDestinations(destinationsText)
+        RouteDestinationParser.parse(destinationsText)
     }
 
     var body: some View {
@@ -39,6 +43,13 @@ struct AddRouteRuleView: View {
                 Text(L10n.tr("add.destinations_detail"))
                     .font(.caption)
                     .foregroundColor(.secondary)
+
+                HStack {
+                    Spacer()
+                    Button(L10n.tr("add.import_file")) {
+                        importDestinationsFromFile()
+                    }
+                }
 
                 TextEditor(text: $destinationsText)
                     .font(.system(.body, design: .monospaced))
@@ -63,6 +74,12 @@ struct AddRouteRuleView: View {
                         .font(.caption)
                         .foregroundColor(.red)
                 }
+
+                if let importedFileURL {
+                    Text(L10n.fmt("add.imported_file", importedFileURL.lastPathComponent))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
 
             // Interface selector
@@ -75,15 +92,18 @@ struct AddRouteRuleView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
-                    Picker(L10n.tr("add.interface_picker"), selection: $selectedInterfaceIndex) {
-                        ForEach(Array(validInterfaces.enumerated()), id: \.offset) { index, iface in
+                    Picker(L10n.tr("add.interface_picker"), selection: Binding(
+                        get: { selectedInterfaceID ?? "" },
+                        set: { selectedInterfaceID = $0.isEmpty ? nil : $0 }
+                    )) {
+                        ForEach(validInterfaces) { iface in
                             HStack {
                                 Text("\(iface.hardwarePort) (\(iface.deviceName))")
                                 if let ip = iface.ipAddress {
                                     Text("- \(ip)")
                                 }
                             }
-                            .tag(index)
+                            .tag(iface.id)
                         }
                     }
                 }
@@ -137,50 +157,21 @@ struct AddRouteRuleView: View {
         .onAppear {
             syncPreferredInterface()
         }
-    }
-
-    private static func isValidIP(_ value: String) -> Bool {
-        let parts = value.split(separator: ".")
-        guard parts.count == 4 else { return false }
-        return parts.allSatisfy { part in
-            guard UInt8(part) != nil else { return false }
-            return true
+        .onChange(of: validInterfaces) { newInterfaces in
+            selectedInterfaceID = AddRouteInterfaceSelection.reconciledSelectionID(
+                from: newInterfaces,
+                preferredInterfaceID: preferredInterfaceID,
+                currentSelectionID: selectedInterfaceID
+            )
         }
-    }
-
-    private static func isValidCIDR(_ value: String) -> Bool {
-        let parts = value.split(separator: "/")
-        guard parts.count == 2 else { return false }
-        guard let prefix = UInt8(parts[1]), prefix <= 32 else { return false }
-        return isValidIP(String(parts[0]))
-    }
-
-    private static func parseDestinations(_ input: String) -> ParsedDestinations {
-        let rawTokens = input
-            .components(separatedBy: CharacterSet(charactersIn: ",;\n\t "))
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        var valid: [String] = []
-        var invalid: [String] = []
-        var seen = Set<String>()
-
-        for token in rawTokens {
-            guard seen.insert(token).inserted else { continue }
-            if isValidIP(token) || isValidCIDR(token) {
-                valid.append(token)
-            } else {
-                invalid.append(token)
-            }
-        }
-
-        return ParsedDestinations(valid: valid, invalid: invalid)
     }
 
     private func syncPreferredInterface() {
-        guard let preferredInterfaceID else { return }
-        guard let index = validInterfaces.firstIndex(where: { $0.id == preferredInterfaceID }) else { return }
-        selectedInterfaceIndex = index
+        selectedInterfaceID = AddRouteInterfaceSelection.reconciledSelectionID(
+            from: validInterfaces,
+            preferredInterfaceID: preferredInterfaceID,
+            currentSelectionID: selectedInterfaceID
+        )
     }
 
     private func addRules() async {
@@ -223,6 +214,41 @@ struct AddRouteRuleView: View {
         }
     }
 
+    private func importDestinationsFromFile() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.plainText, .text]
+
+        // MenuBarExtra windows can stay non-key while a custom overlay is shown,
+        // so bring the app forward before starting a modal open panel.
+        NSApplication.shared.activate(ignoringOtherApps: true)
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let content = try String(contentsOf: url, encoding: .utf8)
+            let parsed = RouteDestinationParser.parse(content)
+            guard !parsed.valid.isEmpty else {
+                errorMessage = L10n.tr("add.import_no_valid_routes")
+                return
+            }
+
+            let existing = RouteDestinationParser.parse(destinationsText)
+            let merged = existing.valid + parsed.valid
+            let deduplicated = Array(NSOrderedSet(array: merged)) as? [String] ?? merged
+            destinationsText = deduplicated.joined(separator: "\n")
+            importedFileURL = url
+            resultMessage = L10n.fmt("add.import_success", parsed.valid.count)
+            errorMessage = parsed.invalid.isEmpty
+                ? nil
+                : L10n.fmt("add.import_invalid_entries", parsed.invalid.joined(separator: ", "))
+        } catch {
+            errorMessage = L10n.fmt("add.import_failed", error.localizedDescription)
+        }
+    }
+
     private func closeView() {
         if let onClose {
             onClose()
@@ -242,7 +268,79 @@ struct AddRouteRuleView: View {
     }
 }
 
-private struct ParsedDestinations {
+struct ParsedDestinations {
     let valid: [String]
     let invalid: [String]
+}
+
+enum AddRouteInterfaceSelection {
+    static func selectedInterface(
+        from validInterfaces: [NetworkInterface],
+        selectedInterfaceID: String?
+    ) -> NetworkInterface? {
+        guard let selectedInterfaceID else { return nil }
+        return validInterfaces.first(where: { $0.id == selectedInterfaceID })
+    }
+
+    static func reconciledSelectionID(
+        from validInterfaces: [NetworkInterface],
+        preferredInterfaceID: String?,
+        currentSelectionID: String?
+    ) -> String? {
+        guard !validInterfaces.isEmpty else { return nil }
+
+        if let currentSelectionID,
+           validInterfaces.contains(where: { $0.id == currentSelectionID }) {
+            return currentSelectionID
+        }
+
+        if let preferredInterfaceID,
+           validInterfaces.contains(where: { $0.id == preferredInterfaceID }) {
+            return preferredInterfaceID
+        }
+
+        return validInterfaces.first?.id
+    }
+}
+
+enum RouteDestinationParser {
+    static func parse(_ input: String) -> ParsedDestinations {
+        let rawTokens = input
+            .components(separatedBy: CharacterSet(charactersIn: ",;\n\t "))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        var valid: [String] = []
+        var invalid: [String] = []
+        var seen = Set<String>()
+
+        for token in rawTokens {
+            guard seen.insert(token).inserted else { continue }
+            if isValidIP(token) || isValidCIDR(token) {
+                valid.append(token)
+            } else {
+                invalid.append(token)
+            }
+        }
+
+        return ParsedDestinations(valid: valid, invalid: invalid)
+    }
+
+    static func isValidIP(_ value: String) -> Bool {
+        isValidIPv4(value, allowCompressedTrailingZeros: false)
+    }
+
+    static func isValidCIDR(_ value: String) -> Bool {
+        let parts = value.split(separator: "/", omittingEmptySubsequences: false)
+        guard parts.count == 2 else { return false }
+        guard let prefix = UInt8(parts[1]), prefix <= 32 else { return false }
+        return isValidIPv4(String(parts[0]), allowCompressedTrailingZeros: true)
+    }
+
+    private static func isValidIPv4(_ value: String, allowCompressedTrailingZeros: Bool) -> Bool {
+        let parts = value.split(separator: ".", omittingEmptySubsequences: false)
+        let expectedCount = allowCompressedTrailingZeros ? 1...4 : 4...4
+        guard expectedCount.contains(parts.count) else { return false }
+        return parts.allSatisfy { UInt8($0) != nil }
+    }
 }

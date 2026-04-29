@@ -59,7 +59,7 @@ RouteFlow 当前的实现方式和代码保持一致，核心流程如下：
 4. 通过 `osascript` 触发 macOS 管理员授权，再调用 `/sbin/route` 动态修改系统路由表。
 5. 使用 `netstat -nr -f inet` 校验当前系统路由，并与已保存规则做同步。
 
-当前每条规则都与具体接口绑定，并使用 `-ifscope` 控制作用网卡，适合“内网走 A，外网走 B”这类多出口场景。
+当前每条规则都会记录所属接口，但实际写入系统时使用所选接口对应的网关创建全局静态路由，避免生成只对部分本机流量生效的 `-ifscope` 受限路由。
 
 ### 安装
 
@@ -209,7 +209,7 @@ The current implementation works like this:
 4. It asks for administrator privileges through `osascript`, then updates the macOS routing table with `/sbin/route`.
 5. It reads `netstat -nr -f inet` to reconcile saved rules with the live system route table.
 
-Each rule is bound to a specific interface and applied with `-ifscope`, which makes it useful for "intranet through interface A, internet through interface B" workflows.
+Each rule stays associated with a specific interface in the app, but the system route is installed as a global static gateway route through that interface's gateway instead of an `-ifscope`-limited route.
 
 ### Installation
 

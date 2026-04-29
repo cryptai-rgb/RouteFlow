@@ -211,7 +211,7 @@ class MenuBarViewModel: ObservableObject {
                let prevIface = previousInterfaces.first(where: { $0.id == currentIface.id }),
                !prevIface.isActive {
                 // Interface came back up - restore affected rules
-                await restoreRulesForInterface(currentIface.deviceName, gateway: currentIface.gateway ?? "")
+                await restoreRulesForInterface(currentIface.deviceName)
                 sendNotification(
                     title: L10n.tr("notify.interface_up.title"),
                     body: L10n.fmt("notify.interface_up.body", currentIface.hardwarePort, currentIface.deviceName)
@@ -230,14 +230,14 @@ class MenuBarViewModel: ObservableObject {
         }
     }
 
-    private func restoreRulesForInterface(_ deviceName: String, gateway: String) async {
+    private func restoreRulesForInterface(_ deviceName: String) async {
         let affectedRules = config.rules.filter { $0.interfaceName == deviceName && $0.isActive }
-        for rule in affectedRules {
-            do {
-                try await routeManager.applyRule(rule)
-            } catch {
-                // Will be tracked as failed in routeManager
-            }
+        guard !affectedRules.isEmpty else { return }
+
+        do {
+            _ = try await routeManager.applyRules(affectedRules)
+        } catch {
+            // Will be tracked in routeManager so interface monitoring can continue.
         }
     }
 
@@ -278,7 +278,7 @@ class MenuBarViewModel: ObservableObject {
             }
 
             let rulesToRemove = RouteManager.rulesToRemoveOnGlobalDeactivate(config.rules)
-                .filter { hasMatchingSystemRoute(for: $0) }
+                .filter { hasInstalledSystemRoute(for: $0) }
             guard !rulesToRemove.isEmpty else { return }
             guard await confirmStartupPrivilegePrompt(ruleCount: rulesToRemove.count) else { return }
             await routeManager.removeAllRules(rulesToRemove)
@@ -307,7 +307,7 @@ class MenuBarViewModel: ObservableObject {
                     await refreshSystemRoutes()
 
                     let rulesToRemove = RouteManager.rulesToRemoveOnGlobalDeactivate(config.rules)
-                        .filter { hasMatchingSystemRoute(for: $0) }
+                        .filter { hasInstalledSystemRoute(for: $0) }
 
                     if !rulesToRemove.isEmpty {
                         _ = try await routeManager.removeRules(rulesToRemove)
@@ -365,20 +365,30 @@ class MenuBarViewModel: ObservableObject {
                 continue
             }
 
+            if routeManager.manualRoutes.contains(where: {
+                RouteCommandBuilder.routeMatches(rule: rule, entry: $0)
+            }) {
+                imported.append(destination)
+                rulesToPersist.append(rule)
+                continue
+            }
+
+            if routeManager.manualRoutes.contains(where: {
+                RouteCommandBuilder.routeIdentityMatches(rule: rule, entry: $0) && $0.isInterfaceScoped
+            }) {
+                rulesToApply.append(rule)
+                continue
+            }
+
             if let existingRoute = routeManager.manualRoutes.first(where: {
                 RouteCommandBuilder.destinationsEquivalent($0.destination, destination)
             }) {
-                if existingRoute.interfaceName == iface.deviceName && existingRoute.gateway == gateway {
-                    imported.append(destination)
-                    rulesToPersist.append(rule)
-                } else {
-                    failed.append(
-                        BatchAddFailure(
-                            destination: destination,
-                            reason: L10n.fmt("add.route_exists", existingRoute.interfaceName, existingRoute.gateway)
-                        )
+                failed.append(
+                    BatchAddFailure(
+                        destination: destination,
+                        reason: L10n.fmt("add.route_exists", existingRoute.interfaceName, existingRoute.gateway)
                     )
-                }
+                )
                 continue
             }
 
@@ -436,19 +446,28 @@ class MenuBarViewModel: ObservableObject {
     }
 
     func removeRule(_ rule: RouteRule) {
+        guard Self.shouldRemoveSystemRouteWhenDeletingSavedRule(isGloballyActive: isGloballyActive) else {
+            deleteSavedRuleLocally(rule)
+            return
+        }
+
         Task {
-            try? await routeManager.removeRule(rule)
+            do {
+                try await routeManager.removeRule(rule)
+                deleteSavedRuleLocally(rule)
+            } catch {
+                routeManager.lastError = error.localizedDescription
+            }
             await refreshSystemRoutes()
         }
-        config.rules.removeAll { $0.id == rule.id }
-        saveConfig()
     }
 
     func removeManagedRoute(_ route: SystemRouteEntry) async {
         do {
             try await routeManager.removeRoute(
                 destination: route.destination,
-                interfaceName: route.interfaceName
+                interfaceName: route.interfaceName,
+                gateway: route.gateway
             )
             config.rules.removeAll {
                 RouteCommandBuilder.destinationsEquivalent($0.destination, route.destination) &&
@@ -534,5 +553,20 @@ class MenuBarViewModel: ObservableObject {
 
     private func hasMatchingSystemRoute(for rule: RouteRule) -> Bool {
         routeManager.manualRoutes.contains(where: { RouteCommandBuilder.routeMatches(rule: rule, entry: $0) })
+    }
+
+    private func hasInstalledSystemRoute(for rule: RouteRule) -> Bool {
+        routeManager.manualRoutes.contains(where: { RouteCommandBuilder.routeIdentityMatches(rule: rule, entry: $0) })
+    }
+
+    private func deleteSavedRuleLocally(_ rule: RouteRule) {
+        config.rules.removeAll { $0.id == rule.id }
+        routeManager.appliedRules.remove(rule.id)
+        routeManager.failedRules.remove(rule.id)
+        saveConfig()
+    }
+
+    static func shouldRemoveSystemRouteWhenDeletingSavedRule(isGloballyActive: Bool) -> Bool {
+        isGloballyActive
     }
 }
