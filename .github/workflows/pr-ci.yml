@@ -1,0 +1,117 @@
+name: PR CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Static Analysis
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode Version
+        run: xcodebuild -version
+
+      - name: Run Analyze
+        run: |
+          xcodebuild \
+            -project RouteFlow.xcodeproj \
+            -scheme RouteFlow \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .derived/ci-analyze \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            analyze
+
+  build_test:
+    name: Build And Test
+    runs-on: macos-latest
+    needs: analyze
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          xcodebuild \
+            -project RouteFlow.xcodeproj \
+            -scheme RouteFlow \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .derived/ci-build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Test
+        run: |
+          xcodebuild \
+            -project RouteFlow.xcodeproj \
+            -scheme RouteFlow \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath .derived/ci-test \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            test
+
+  package_unsigned:
+    name: Package Unsigned Artifact
+    runs-on: macos-latest
+    needs: build_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Release App
+        run: |
+          xcodebuild \
+            -project RouteFlow.xcodeproj \
+            -scheme RouteFlow \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath .derived/ci-package \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Create Zip Package
+        run: |
+          APP_PATH=".derived/ci-package/Build/Products/Release/RouteFlow.app"
+          ZIP_NAME="RouteFlow-pr-${{ github.event.pull_request.number }}-${{ github.sha }}.app.zip"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "RouteFlow.app not found at $APP_PATH"
+            exit 1
+          fi
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload PR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 7

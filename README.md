@@ -88,6 +88,15 @@ xcodegen generate
 
 然后直接打开 `RouteFlow.xcodeproj` 进行编译和运行。
 
+如果你使用的是 CI 产出的 PR 构建包（`RouteFlow-pr-<PR号>-<SHA>.app.zip`），请先阅读启动说明：
+[PR 构建包（macOS）启动说明](docs/PR_BUILD_MACOS_RUNBOOK.md)
+
+如果首次启动被 macOS 拦截，请先执行：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/RouteFlow-pr-<PR号>-<SHA>.app"
+```
+
 #### Windows
 
 当前仓库没有 Windows 实现，也没有安装包。
@@ -237,6 +246,15 @@ xcodegen generate
 ```
 
 Then open `RouteFlow.xcodeproj` and run the app from Xcode.
+
+If you are using the CI PR artifact (`RouteFlow-pr-<PR-number>-<SHA>.app.zip`), check the launch guide first:
+[PR Build (macOS) Launch Guide](docs/PR_BUILD_MACOS_RUNBOOK.md)
+
+If macOS blocks the first launch, run:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/RouteFlow-pr-<PR-number>-<SHA>.app"
+```
 
 #### Windows
 
